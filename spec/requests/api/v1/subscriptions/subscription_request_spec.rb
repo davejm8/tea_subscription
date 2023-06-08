@@ -45,4 +45,24 @@ RSpec.describe "Subscriptions", type: :request do
       expect(response_subscription[:errors]).to eq(["Frequency can't be blank"])
     end
   end
+
+  context 'PATCH /api/v1/customers/:customer_id/subscriptions/:id' do
+    it 'updates a subscription for a customer' do
+      customer = create(:customer)
+      tea = create(:tea)
+      subscription = create(:subscription, customer: customer, tea: tea)
+      subscription_params = { title: "Updated Subscription Title", price: 10.00, status: "cancelled", frequency: "monthly", tea_id: tea.id }
+      headers = { "CONTENT_TYPE" => "application/json" }
+      patch "/api/v1/customers/#{customer.id}/subscriptions/#{subscription.id}", headers: headers, params: JSON.generate({subscription: subscription_params})
+
+      updated_subscription = Subscription.find(subscription.id)
+      response_subscription = JSON.parse(response.body, symbolize_names: true)
+
+      expect(response).to be_successful
+      expect(updated_subscription.title).to eq("Updated Subscription Title")
+      expect(updated_subscription.price).to eq(10.00)
+      expect(updated_subscription.status).to eq("cancelled")
+      expect(updated_subscription.frequency).to eq("monthly")
+    end
+  end
 end
