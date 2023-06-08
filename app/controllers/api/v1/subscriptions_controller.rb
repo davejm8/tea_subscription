@@ -1,6 +1,20 @@
 class Api::V1::SubscriptionsController < ApplicationController
-  def index
+  def create
+    tea = Tea.find(params[:subscription][:tea_id])
     customer = Customer.find(params[:customer_id])
-    render json: SubscriptionSerializer.new(customer.subscriptions)
+    subscription = customer.subscriptions.new(subscription_params)
+    subscription.tea = tea
+
+    if subscription.save
+      render json: SubscriptionSerializer.new(subscription), status: :created
+    else
+      render json: { errors: subscription.errors.full_messages }, status: :unprocessable_entity
+    end
+  end
+
+  private
+
+  def subscription_params
+    params.require(:subscription).permit(:title, :price, :status, :frequency)
   end
 end
