@@ -1,4 +1,11 @@
 class Api::V1::SubscriptionsController < ApplicationController
+
+  def index
+    customer = Customer.find(params[:customer_id])
+    subscriptions = customer.subscriptions
+    render json: SubscriptionSerializer.new(subscriptions)
+  end
+
   def create
     tea = Tea.find(params[:subscription][:tea_id])
     customer = Customer.find(params[:customer_id])
@@ -14,10 +21,11 @@ class Api::V1::SubscriptionsController < ApplicationController
 
   def update
     subscription = Subscription.find(params[:id])
-    subscription.update(subscription_params)
+    subscription.update!(subscription_params)
+  
     if subscription.save
       render json: SubscriptionSerializer.new(subscription), status: :ok
-    else 
+    else
       render json: { errors: subscription.errors.full_messages }, status: :unprocessable_entity
     end
   end

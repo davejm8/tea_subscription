@@ -1,6 +1,6 @@
-class CustomersController < ApplicationController
-  def show
-    @customer = Customer.find(params[:id])
-    render json: @customer
-  end
-end
+# class CustomersController < ApplicationController
+#   def index
+#     @subscriptions = Subscription.find(params[:customer_id])
+#     render json: SubscriptionSerializer.new(@subscriptions)
+#   end
+# end

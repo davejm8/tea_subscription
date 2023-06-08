@@ -64,5 +64,54 @@ RSpec.describe "Subscriptions", type: :request do
       expect(updated_subscription.status).to eq("cancelled")
       expect(updated_subscription.frequency).to eq("monthly")
     end
+
+     it "returns error when update fails" do
+      customer = create(:customer)
+      tea = create(:tea)
+      subscription = create(:subscription, customer: customer, tea: tea)
+
+      invalid_subscription_params = { title: "", price: -1, status: "unknown", frequency: "unknown", customer_id: customer.id, tea_id: tea.id }
+      headers = { "CONTENT_TYPE" => "application/json" }
+
+      patch "/api/v1/customers/#{customer.id}/subscriptions/#{subscription.id}", headers: headers, params: JSON.generate(invalid_subscription_params)
+
+      expect(response).to have_http_status(:unprocessable_entity)
+    end
+  end
+
+  context 'GET /api/v1/customers/:customer_id/subscriptions' do
+    it 'returns all subscriptions for a customer' do
+      customer = create(:customer)
+      tea1 = create(:tea)
+      tea2 = create(:tea)
+      tea3 = create(:tea)
+      subscription1 = create(:subscription, customer: customer, tea: tea1)
+      subscription2 = create(:subscription, customer: customer, tea: tea2)
+      subscription3 = create(:subscription, customer: customer, tea: tea3)
+
+      headers = { "CONTENT_TYPE" => "application/json" }
+      get "/api/v1/customers/#{customer.id}/subscriptions"
+
+      response_subscriptions = JSON.parse(response.body, symbolize_names: true)
+
+      expect(response).to be_successful
+      expect(response_subscriptions[:data].count).to eq(3)
+      expect(response_subscriptions[:data][0][:id]).to eq(subscription1.id.to_s)
+      expect(response_subscriptions[:data][0][:type]).to eq("subscription")
+      expect(response_subscriptions[:data][0][:attributes].keys).to eq([:title, :price, :status, :frequency, :customer_id, :tea_id])
+      expect(response_subscriptions[:data][0][:attributes][:title]).to eq(subscription1.title)
+      expect(response_subscriptions[:data][0][:attributes][:price]).to eq(subscription1.price)
+      expect(response_subscriptions[:data][0][:attributes][:status]).to eq(subscription1.status)
+      expect(response_subscriptions[:data][0][:attributes][:frequency]).to eq(subscription1.frequency)
+      expect(response_subscriptions[:data][0][:attributes][:customer_id]).to eq(subscription1.customer_id)
+      expect(response_subscriptions[:data][0][:attributes][:tea_id]).to eq(subscription1.tea_id)
+    end
+
+    it 'returns 404 if customer does not exist' do
+      headers = { "CONTENT_TYPE" => "application/json" }
+      get "/api/v1/customers/123123124/subscriptions"
+
+      expect(response.status).to eq(404)
+    end
   end
 end
