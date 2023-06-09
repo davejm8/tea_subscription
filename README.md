@@ -22,6 +22,7 @@ Copy code
 
 ## Setup the database:
 
+![Screen Shot 2023-06-09 at 12 11 49 PM](https://user-images.githubusercontent.com/116821829/244747921-d367d9b2-13c0-4b72-9782-90b743cdac89.png)
 
 Copy code
 
